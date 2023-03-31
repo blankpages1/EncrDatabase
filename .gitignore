@@ -15,6 +15,7 @@
 *.so
 *.dylib
 *.dll
+*.pdb
 
 # Fortran module files
 *.mod
@@ -30,3 +31,6 @@
 *.exe
 *.out
 *.app
+
+x64
+FileEncryptor/x64
