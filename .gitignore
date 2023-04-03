@@ -32,5 +32,6 @@
 *.out
 *.app
 
+.vs
 x64
 FileEncryptor/x64

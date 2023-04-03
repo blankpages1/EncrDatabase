@@ -19,6 +19,7 @@ struct INT128 {
 	INT128(const INT256& other);
 	INT128(const INT128& other);
 	INT128(const __m128i& other);
+	INT128 operator^(const INT128& other);
 	__m128i getData() const;
 	uint8_t data[16] = {};
 };

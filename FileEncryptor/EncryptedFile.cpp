@@ -50,11 +50,13 @@ EncryptedFile::EncryptedFile(const std::string& filelocation, const std::string&
 			
 			data.reserve(datasize);
 
-			INT128 encRead;
+			INT128 encRead, encPrev = encryptedHeader;
 			INT128 decRead;
 			for(int i = 0; i < std::ceil(double(datasize)/16); i++) {
 				file.read((char*)encRead.data, 16);
 				crypto::AESDecrypt_128(keys, encRead, decRead);
+				decRead = decRead ^ encPrev;
+				encPrev = encRead;
 				for (int i = 0; i < 16; i++)
 					data.push_back(decRead.data[i]);
 			}
@@ -118,7 +120,8 @@ void EncryptedFile::writeFile() {
 	crypto::AESEncrypt_128(keys, *(INT128*)header, encData);
 	file.write((char*)encData.data, 16);
 	for (uint64_t i = 0; i < data.size() / 16; i++) {
-		crypto::AESEncrypt_128(keys, *(INT128*)(&data[i * 16]), encData);
+		INT128 toenc = *(INT128*)(&data[i * 16]) ^ encData;
+		crypto::AESEncrypt_128(keys, toenc, encData);
 		file.write((char*)encData.data, 16);
 	}
 	

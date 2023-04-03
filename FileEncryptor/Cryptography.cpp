@@ -35,6 +35,12 @@ INT128::INT128(const INT128& other){
 INT128::INT128(const __m128i& other){
 	_mm_storeu_si128((__m128i*)data, other);
 }
+INT128 INT128::operator^(const INT128& other){
+	INT128 ret;
+	*((uint64_t*)ret.data + 0) = *((uint64_t*)this->data+0) ^ *((uint64_t*)other.data+0);
+	*((uint64_t*)ret.data + 1) = *((uint64_t*)this->data+1) ^ *((uint64_t*)other.data+1);
+	return ret;
+}
 __m128i INT128::getData() const{
 	return _mm_loadu_si128((__m128i*)data);
 }
@@ -44,10 +50,10 @@ uint32_t add(uint64_t ri, uint64_t le) {
 	return (ri + le) % uint64_t(0x100000000);
 }
 uint32_t rotl(uint32_t data, uint32_t n) {
-	return (data << n) | (data >> 32 - n);
+	return (data << n) | (data >> (32 - n));
 }
 uint32_t rotr(uint32_t data, uint32_t n) {
-	return (data >> n) | (data << 32 - n);
+	return (data >> n) | (data << (32 - n));
 }
 
 uint32_t ch(uint32_t x, uint32_t y, uint32_t z) {
@@ -74,7 +80,7 @@ uint32_t o1(uint32_t x) {
 void crypto::SHA2_256(std::string message, INT256& container){
 	
 	uint64_t messageSizeB = message.size();
-	uint64_t finalBytes = std::ceill(double(messageSizeB + 9) / 64) * 64;
+	uint64_t finalBytes = (uint64_t)std::ceill(double(messageSizeB + 9) / 64) * 64;
 	std::vector<uint8_t> data;
 	for (int i = 0; i < finalBytes; i++)
 		data.push_back(0);
@@ -92,13 +98,13 @@ void crypto::SHA2_256(std::string message, INT256& container){
 	for (int x = 0; x < finalBytes * 8; x++) {
 		if (!(x % 8))
 			std::cout << "\n";
-		std::cout << (((data[floor(x / 8)] >> (7 - (x % 8))) & 1) ? "1" : "0");
+		std::cout << (((data[(size_t)floor(x / 8)] >> (7 - (x % 8))) & 1) ? "1" : "0");
 	}
 	std::cout << "\n";
 #endif
 
 	//array of constants
-	const uint32_t const CONSTANTS[] = { 
+	const uint32_t CONSTANTS[] = {
 		0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5, 0x3956c25b, 0x59f111f1, 0x923f82a4, 0xab1c5ed5,
 		0xd807aa98, 0x12835b01, 0x243185be, 0x550c7dc3, 0x72be5d74, 0x80deb1fe, 0x9bdc06a7, 0xc19bf174,
 		0xe49b69c1, 0xefbe4786, 0x0fc19dc6, 0x240ca1cc, 0x2de92c6f, 0x4a7484aa, 0x5cb0a9dc, 0x76f988da,
